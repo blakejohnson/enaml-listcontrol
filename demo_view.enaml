@@ -1,0 +1,64 @@
+#------------------------------------------------------------------------------
+# Copyright (c) 2013, Nucleic Development Team.
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file COPYING.txt, distributed with this software.
+#------------------------------------------------------------------------------
+from enaml.layout.api import vertical, horizontal, align, spacer, vbox
+from enaml.widgets.api import (
+    Window, Label, Field, Form, DateSelector, CheckBox, GroupBox, Container,
+    PushButton
+)
+from qt_list_str_widget import QtListStrWidget
+
+
+enamldef EmployeeForm(Form):
+    attr employee
+    Label:
+        text = "First name:"
+    Field:
+        text := employee.first_name
+    Label:
+        text = "Last name:"
+    Field:
+        text := employee.last_name
+    Label:
+        text = "Possible nick names:"
+    QtListStrWidget: nick_list:
+        items << employee.nick_names
+        selected_index >> employee.index
+        selected_item >> employee.nick_name
+        # operations = []
+    Label:
+        text = "Add Foo"
+    PushButton:
+        text = "Add"
+        clicked ::
+            employee.nick_names = employee.nick_names + ["Foo"]
+    Label:
+        text = "Nick name:"
+    Field:
+        text << employee.nick_name
+        read_only = True
+
+        
+
+enamldef View(Window): main:
+    attr model
+    title << "Employee Record for: %s, %s" % (model.last_name,
+                                              model.first_name)
+    Container:
+        constraints = [
+            vertical(
+                top, top_box, spacer, bottom
+            ),
+            horizontal(left, spacer.flex(), top_box, spacer.flex(), right),
+            align('midline', top_form),
+        ]
+        GroupBox: top_box:
+            share_layout = True
+            title = "Personal Details"
+            EmployeeForm: top_form:
+                employee = model
+
